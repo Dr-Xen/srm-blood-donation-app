@@ -1,0 +1,13 @@
+.next/
+node_modules/
+next-env.d.ts
+*.db
+*.db-journal
+
+# Environment files — never commit these
+.env
+.env.local
+.env.*.local
+
+/public/registration-qr.png
+/public/qr-code.html
