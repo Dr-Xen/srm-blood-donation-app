@@ -16,7 +16,7 @@ export default function AuthPage() {
       options: {
         shouldCreateUser: true,
         emailRedirectTo:
-          'http://localhost:3000/auth/callback',
+  'https://YOUR-VERCEL-URL.vercel.app/auth/callback'
       },
     });
 
