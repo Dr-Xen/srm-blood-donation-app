@@ -6,33 +6,32 @@ import { supabase } from '@/lib/supabase';
 export default function CallbackPage() {
   useEffect(() => {
     async function handleAuth() {
-      const hash = window.location.hash;
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      if (!hash) {
-        window.location.href = '/';
-        return;
-      }
-
-      const params = new URLSearchParams(
-        hash.replace('#', '')
-      );
-
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-
-      if (access_token && refresh_token) {
-        const { error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-
-        if (!error) {
+        if (session) {
           window.location.href = '/dashboard';
           return;
         }
-      }
 
-      window.location.href = '/';
+        // Give Supabase a moment to process auth
+        setTimeout(async () => {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (session) {
+            window.location.href = '/dashboard';
+          } else {
+            window.location.href = '/';
+          }
+        }, 1500);
+      } catch (error) {
+        console.error(error);
+        window.location.href = '/';
+      }
     }
 
     handleAuth();
