@@ -59,12 +59,17 @@ export default function AdminPage() {
   const [examForm, setExamForm] = useState<ExamForm>(BLANK_EXAM);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
-
+  const [campResponses, setCampResponses] = useState<any[]>([]);
   const fetchDonors = useCallback(async (pw: string) => {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/donors', { headers: { 'x-admin-password': pw } });
       if (res.ok) setDonors(await res.json());
+      const responseRes = await fetch('/api/admin/camp-responses');
+
+if (responseRes.ok) {
+  setCampResponses(await responseRes.json());
+}
     } finally {
       setLoading(false);
     }
@@ -334,7 +339,56 @@ export default function AdminPage() {
             </button>
           ))}
         </div>
+<div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
+  <h2 className="text-lg font-bold mb-4">
+    Camp Responses
+  </h2>
 
+  {campResponses.length === 0 ? (
+    <p className="text-gray-500">
+      No camp responses yet.
+    </p>
+  ) : (
+    <div className="space-y-3">
+      {campResponses.map((r) => (
+        <div
+          key={r.id}
+          className="border rounded-lg p-3"
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="font-semibold">
+                {r.camp.campName}
+              </p>
+
+              <p className="text-sm text-gray-600">
+                {r.donor.fullName}
+              </p>
+
+              <p className="text-xs text-gray-500">
+                {r.donor.email}
+              </p>
+
+              <p className="text-xs text-gray-500">
+                {r.donor.mobile}
+              </p>
+            </div>
+
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold ${
+                r.response === 'ACCEPTED'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+              }`}
+            >
+              {r.response}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
         {/* Donor list */}
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading donors…</div>

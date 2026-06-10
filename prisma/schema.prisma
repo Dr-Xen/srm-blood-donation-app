@@ -1,66 +1,100 @@
 generator client {
-  provider = "prisma-client-js"
+provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+provider = "postgresql"
+url      = env("DATABASE_URL")
 }
 
 model Donor {
-  id                 String       @id @default(cuid())
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+id                  String       @id @default(cuid())
+createdAt           DateTime     @default(now())
+updatedAt           DateTime     @updatedAt
 
-  fullName           String
-  fatherName         String
-  occupation         String
-  address            String
-  mobile             String
-  email              String       @default("")
-  gender             String
-  maritalStatus      String
-  dob                String
-  age                Int
-  weightKg           Float
-  donationType       String       @default("WHOLE_BLOOD")
-  isFirstTimeDonor   Boolean      @default(false)
-  lastDonationDate   String       @default("")
+fullName            String
+fatherName          String
+occupation          String
+address             String
+mobile              String
+email               String       @unique
+gender              String
+maritalStatus       String
+dob                 String
+age                 Int
+weightKg            Float
+donationType        String       @default("WHOLE_BLOOD")
+isFirstTimeDonor    Boolean      @default(false)
+lastDonationDate    String       @default("")
 
-  eligibleVolume     Int          @default(450)
-  screeningAnswers   String
-  eligibilityStatus  String
-  deferralReason     String       @default("")
-  eligibleReturnDate String       @default("")
+eligibleVolume      Int          @default(450)
+screeningAnswers    String
+eligibilityStatus   String
+deferralReason      String       @default("")
+eligibleReturnDate  String       @default("")
 
-  wantTestResults    Boolean      @default(true)
-  declarationAccepted Boolean     @default(false)
-  signedName         String       @default("")
-  consentTimestamp   String       @default("")
+wantTestResults     Boolean      @default(true)
+declarationAccepted Boolean      @default(false)
+signedName          String       @default("")
+consentTimestamp    String       @default("")
 
-  medicalExam        MedicalExam?
+medicalExam         MedicalExam?
+
+campResponses       CampResponse[]
 }
 
 model MedicalExam {
-  id               String   @id @default(cuid())
-  donorId          String   @unique
-  donor            Donor    @relation(fields: [donorId], references: [id])
-  createdAt        DateTime @default(now())
+id               String   @id @default(cuid())
+donorId          String   @unique
+donor            Donor    @relation(fields: [donorId], references: [id])
+createdAt        DateTime @default(now())
 
-  donationDate     String
-  heightCm         Float    @default(0)
-  weightKg         Float
-  haemoglobin      Float
-  temperature      Float
-  pulse            Int
-  bpSystolic       Int
-  bpDiastolic      Int
+donationDate     String
+heightCm         Float    @default(0)
+weightKg         Float
+haemoglobin      Float
+temperature      Float
+pulse            Int
+bpSystolic       Int
+bpDiastolic      Int
 
-  finalStatus      String
-  comments         String   @default("")
+finalStatus      String
+comments         String   @default("")
 
-  bloodUnitNumber  String   @default("")
-  bagSegmentNumber String   @default("")
-  volumeCollected  Int      @default(0)
-  examinedBy       String   @default("")
+bloodUnitNumber  String   @default("")
+bagSegmentNumber String   @default("")
+volumeCollected  Int      @default(0)
+examinedBy       String   @default("")
+}
+
+model Camp {
+id            String         @id @default(cuid())
+createdAt     DateTime       @default(now())
+
+campName      String
+campDate      String
+campTime      String
+venue         String
+description   String         @default("")
+maxDonors     Int            @default(100)
+
+status        String         @default("ACTIVE")
+
+responses     CampResponse[]
+}
+
+model CampResponse {
+id            String   @id @default(cuid())
+
+donorId       String
+campId        String
+
+donor         Donor    @relation(fields: [donorId], references: [id])
+camp          Camp     @relation(fields: [campId], references: [id])
+
+response      String
+
+createdAt     DateTime @default(now())
+
+@@unique([donorId, campId])
 }

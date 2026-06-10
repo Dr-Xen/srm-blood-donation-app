@@ -1,17 +1,45 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import type { BasicInfo, ScreeningAnswers, ConsentData, EligibilityResult } from '@/types/donor';
+import type {
+  BasicInfo,
+  ScreeningAnswers,
+  ConsentData,
+  EligibilityResult,
+} from '@/types/donor';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json() as {
+    const body = (await req.json()) as {
       basicInfo: BasicInfo;
       screeningAnswers: ScreeningAnswers;
       consentData: ConsentData;
       eligibilityResult: EligibilityResult;
     };
 
-    const { basicInfo: b, screeningAnswers: s, consentData: c, eligibilityResult: r } = body;
+    const {
+      basicInfo: b,
+      screeningAnswers: s,
+      consentData: c,
+      eligibilityResult: r,
+    } = body;
+
+    const existingDonor = await prisma.donor.findFirst({
+  where: {
+    email: b.email,
+  },
+});
+
+    if (existingDonor) {
+      return NextResponse.json(
+        {
+          error:
+            'A donor profile already exists for this email address.',
+          donorId: existingDonor.id,
+          alreadyRegistered: true,
+        },
+        { status: 409 }
+      );
+    }
 
     const donor = await prisma.donor.create({
       data: {
@@ -41,9 +69,21 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ id: donor.id }, { status: 201 });
+    return NextResponse.json(
+      {
+        id: donor.id,
+        alreadyRegistered: false,
+      },
+      { status: 201 }
+    );
   } catch (err) {
     console.error('[POST /api/donors]', err);
-    return NextResponse.json({ error: 'Failed to save donor.' }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        error: 'Failed to save donor.',
+      },
+      { status: 500 }
+    );
   }
 }

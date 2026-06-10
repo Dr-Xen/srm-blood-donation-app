@@ -40,23 +40,44 @@ export default function ModuleA({ onNext }: Props) {
   }
 
   function validate(): boolean {
-    const e: Partial<Record<keyof BasicInfo, string>> = {};
-    if (!form.fullName.trim()) e.fullName = 'Full name is required.';
-    if (!form.fatherName.trim()) e.fatherName = "Father's name is required.";
-    if (!form.occupation.trim()) e.occupation = 'Occupation is required.';
-    if (!form.address.trim()) e.address = 'Address is required.';
-    if (!/^\d{10}$/.test(form.mobile)) e.mobile = 'Enter a valid 10-digit mobile number.';
-    if (!form.dob) { e.dob = 'Date of birth is required.'; }
-    else if (form.age < 18) { e.dob = 'You must be at least 18 years old.'; }
-    else if (form.age > 65) { e.dob = 'Maximum eligible age is 65 years.'; }
-    if (!form.weightKg || form.weightKg <= 0) e.weightKg = 'Weight is required.';
-    else if (form.weightKg < 45) e.weightKg = 'Minimum weight to donate is 45 kg.';
-    if (!form.isFirstTimeDonor && !form.lastDonationDate) {
-      e.lastDonationDate = 'Please enter your last donation date.';
-    }
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const e: Partial<Record<keyof BasicInfo, string>> = {};
+
+  if (!form.fullName.trim()) e.fullName = 'Full name is required.';
+  if (!form.fatherName.trim()) e.fatherName = "Father's name is required.";
+  if (!form.occupation.trim()) e.occupation = 'Occupation is required.';
+  if (!form.address.trim()) e.address = 'Address is required.';
+
+  if (!/^\d{10}$/.test(form.mobile)) {
+    e.mobile = 'Enter a valid 10-digit mobile number.';
   }
+
+  if (!form.email.trim()) {
+    e.email = 'Email is required.';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    e.email = 'Enter a valid email address.';
+  }
+
+  if (!form.dob) {
+    e.dob = 'Date of birth is required.';
+  } else if (form.age < 18) {
+    e.dob = 'You must be at least 18 years old.';
+  } else if (form.age > 65) {
+    e.dob = 'Maximum eligible age is 65 years.';
+  }
+
+  if (!form.weightKg || form.weightKg <= 0) {
+    e.weightKg = 'Weight is required.';
+  } else if (form.weightKg < 45) {
+    e.weightKg = 'Minimum weight to donate is 45 kg.';
+  }
+
+  if (!form.isFirstTimeDonor && !form.lastDonationDate) {
+    e.lastDonationDate = 'Please enter your last donation date.';
+  }
+
+  setErrors(e);
+  return Object.keys(e).length === 0;
+}
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -90,9 +111,16 @@ export default function ModuleA({ onNext }: Props) {
             <Field label="Mobile Number *" error={errors.mobile}>
               <input className="form-input" type="tel" maxLength={10} value={form.mobile} onChange={e => set('mobile', e.target.value.replace(/\D/g, ''))} placeholder="10-digit number" />
             </Field>
-            <Field label="Email ID">
-              <input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="optional" />
-            </Field>
+            <Field label="Email ID *" error={errors.email}>
+  <input
+    className="form-input"
+    type="email"
+    value={form.email}
+    onChange={e => set('email', e.target.value)}
+    placeholder="Enter your email address"
+    required
+  />
+</Field>
           </div>
         </div>
       </div>
